@@ -1,5 +1,5 @@
 import pyodbc
-from Entries.entries_db import SERVER
+from .Entries.entries_db import SERVER
 
 
 def connect_to_db():
@@ -11,23 +11,23 @@ def connect_to_db():
             "TrustServerCertificate=yes;"
         )
         connection.autocommit = True
-        cursor = connection.cursor()
         print("Connection established successfully")
-        return connection, cursor
+        return connection
     except Exception as e:
         print(f"Error from connection to database: {e}")
         return None, None
 
 
-if __name__ == "__main__":
-    connection, cursor = connect_to_db()
+def create_tables():
+    connection = connect_to_db()
 
     if connection:
+        cursor = connection.cursor()
         cursor.execute(
             "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'SelectedBooks') BEGIN CREATE DATABASE SelectedBooks END"
         )
 
-        cursor.execute("USE SelectedBooks")
+        cursor.execute("USE SelectedBooks;")
 
         cursor.execute(
             """IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Users')
@@ -35,8 +35,7 @@ if __name__ == "__main__":
             CREATE TABLE Users (
                         UserID INT IDENTITY(1,1) PRIMARY KEY,
                         Login varchar(50) UNIQUE,
-                        Password varchar(255) NOT NULL,
-                        Name varchar(255) NOT NULL
+                        Password varchar(255) NOT NULL
                         )
                     END"""
         )
@@ -47,14 +46,15 @@ if __name__ == "__main__":
             CREATE TABLE WishListBooks (
                        
                         BookID INT IDENTITY(1,1) PRIMARY KEY,
-                        Title nvarchar(255) NOT NULL,
-                        Author nvarchar(MAX) NOT NULL,
-                        Publisher nvarchar(255) NOT NULL,
-                        PublishedDate nvarchar(255) NOT NULL,
-                        Description nvarchar(MAX) NOT NULL,
-                        Categories nvarchar(255) NOT NULL,
+                        Title nvarchar(255),
+                        Author nvarchar(MAX),
+                        Publisher nvarchar(255),
+                        PublishedDate nvarchar(255),
+                        Description nvarchar(MAX),
                         PageCount INT NOT NULL,
-                        Language nvarchar(10) NOT NULL,
+                        ImageLink nvarchar(2048), 
+                        BuyLink nvarchar(2048),
+                        Language nvarchar(10),
 
 
                         UserID INT FOREIGN KEY REFERENCES users(UserID),
@@ -63,3 +63,7 @@ if __name__ == "__main__":
         
         END"""
         )
+
+
+connection = connect_to_db()
+cursor = connection.cursor()

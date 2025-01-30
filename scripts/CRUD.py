@@ -1,4 +1,5 @@
-from db_connection import connect_to_db
+from .db_connection import connect_to_db
+
 
 def create(
     Title,
@@ -6,9 +7,10 @@ def create(
     Publisher,
     PublishedDate,
     Description,
-    Categories,
     PageCount,
     Language,
+    ImageLink,
+    BuyLink,
     UserID,
 ):
     connection, cursor = connect_to_db()
@@ -18,7 +20,7 @@ def create(
                 """
             INSERT INTO WishListBooks
             VALUES
-            (?,?,?,?,?,?,?,?,?),
+            (?,?,?,?,?,?,?,?,?,?),
                 """,
                 (
                     Title,
@@ -26,9 +28,10 @@ def create(
                     Publisher,
                     PublishedDate,
                     Description,
-                    Categories,
                     PageCount,
                     Language,
+                    ImageLink,
+                    BuyLink,
                     UserID,
                 ),
             )
@@ -60,6 +63,7 @@ def read():
             cursor.close()
             connection.close()
     return books
+
 
 def delete(BookID):
     connection, cursor = connect_to_db()
