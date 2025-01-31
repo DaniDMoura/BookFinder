@@ -1,5 +1,4 @@
 from .auth import Authentication
-from .requestdata import main_window
 
 def run():
     auth = Authentication()

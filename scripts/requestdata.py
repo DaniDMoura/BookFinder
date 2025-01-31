@@ -29,15 +29,15 @@ def request_data(query):
                     PageCount = book["volumeInfo"].get("pageCount", "Unknown")
                     Language = book["volumeInfo"].get("language", "Unknown")
                     ImageLink = book["volumeInfo"]["imageLinks"]["thumbnail"]
-                    BuyLink = book["saleInfo"]["buyLink"]
+                    BuyLink = book["saleInfo"].get("buyLink", "Unknown")
                 else:
-                    Messagebox.showinfo(
+                    Messagebox.show_info(
                         title="No Results Found",
                         message="No books found for your search. Please try a different query.",
                     )
             except Exception as e:
                 print(f"Error found: {e}")
-                Messagebox.showinfo(
+                Messagebox.show_info(
                     title="No Results Found",
                     message="Error to find your book. Please try a different query.",
                 )
@@ -55,63 +55,63 @@ def request_data(query):
 
             return data
         case 400:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="400 Bad Request",
                 message="The server could not understand the request due to invalid syntax.",
             )
         case 401:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="401 Unauthorized",
                 message="Authentication is required and has failed or has not yet been provided.",
             )
         case 403:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="403 Forbidden",
                 message="You do not have permission to access the requested resource.",
             )
         case 404:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="404 Not Found",
                 message="The requested resource could not be found on this server.",
             )
         case 405:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="405 Method Not Allowed",
                 message="The request method is not supported for the requested resource.",
             )
         case 408:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="408 Request Timeout",
                 message="The server timed out waiting for the request.",
             )
         case 500:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="500 Internal Server Error",
                 message="The server encountered an internal error and was unable to complete your request.",
             )
         case 502:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="502 Bad Gateway",
                 message="The server received an invalid response from an upstream server.",
             )
         case 503:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="503 Service Unavailable",
                 message="The server is currently unable to handle the request due to temporary overloading or maintenance.",
             )
         case 504:
-            return Messagebox.showinfo(
+            return Messagebox.show_error(
                 title="504 Gateway Timeout",
                 message="The server did not receive a timely response from an upstream server.",
             )
 
 
-def search():
+def search(entry_query):
     query = entry_query.get()
     if query:
         request_data(query)
     else:
-        Messagebox.showinfo(title="Input Error", message="Please enter a search term!")
+        Messagebox.show_info(title="Input Error", message="Please enter a search term!")
 
 
 def create_book_window(
@@ -171,7 +171,7 @@ def create_book_window(
         framebook,
         text="Buy",
         bootstyle="success",
-        command=lambda: webbrowser.open(BuyLink),
+        command=lambda: webbrowser.open(BuyLink) if BuyLink != "Unknown" else None,
     )
     wishlistbutton = ttk.Button(
         framebook,
@@ -217,38 +217,33 @@ def read_wishlist():
     read()
 
 
-def main_window():
+def main_window(root):
     global window, entry_query
+    window = ttk.Toplevel(root)
+    window.title("Pesquisar")
+    window.geometry("400x250")
 
-    window = Tk()
-    #window.iconphoto(True, PhotoImage(file="assets/Icons/images.png"))
+    frame = ttk.Frame(window)
+    frame.pack(pady=20, padx=20, fill="both", expand=True)
 
-    style = ttk.Style()
-    style.theme_use("cyborg")
-    style.configure("All.TLabel", font=("Raleway", 10), foreground="#A9A9A9")
-    style.configure(
-        "Allbold.TLabel", font=("Raleway", 11, "bold"), foreground="#A9A9A9"
-    )
-    style.configure(
-        "TScrollbar",
-        gripcount=5,
-        background="#1a1a1a",
-        throughcolor="#333333",
-        relief="flat",
-        thickness=30,
-    )
+    label = ttk.Label(frame, text="Digite o nome do livro:")
+    label.pack(pady=5)
 
-    entry_query = ttk.Entry(window, width=30, bootstyle="primary")
+    entry_query = ttk.Entry(window, width=30, bootstyle="success")
+    entry_query.pack(pady=5)
+
     button_search = ttk.Button(
-        window, text="Search", command=search, bootstyle="primary"
+        window, text="Search", command=lambda: search(entry_query), bootstyle="success"
     )
+    button_search.pack(pady=5, fill="x")
+
     button_wishlist = ttk.Button(
         window, text="See your wish list", command=read_wishlist, bootstyle="secondary"
     )
-    button_search.pack()
-    entry_query.pack()
-    button_wishlist.pack()
-    window.mainloop()
+    button_wishlist.pack(pady=5, fill="x")
+
+    window.protocol("WM_DELETE_WINDOW", root.quit)
 
 
-
+if __name__ == "__main__":
+    main_window()
