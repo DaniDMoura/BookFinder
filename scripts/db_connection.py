@@ -67,3 +67,7 @@ def create_tables():
 
 connection = connect_to_db()
 cursor = connection.cursor()
+
+if __name__ == "__main__":
+    connect_to_db()
+    create_tables()

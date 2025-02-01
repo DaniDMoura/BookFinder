@@ -2,3 +2,4 @@ pyodbc
 requests
 pillow
 ttkbootstrap
+bcrypt

@@ -4,27 +4,33 @@ from tkinter import *
 from .db_connection import cursor
 import os
 import re
-
-
+import bcrypt
 
 class Authentication:
     def __init__(self):
-        self.root = ttk.Window(themename="cyborg")
-        self.sign_up_window = None
+        self.root = ttk.Window(themename="darkly")
+
+        self.sign_up_window = None  
         self.loginwindow = None
+
         self.username_entry = None
         self.password_entry = None
+        self.user_id = None
 
         self.icon_path = os.path.join("assets", "Icons", "images.png")
-        icon_image = PhotoImage(file=self.icon_path)
-        self.root.tk.call('wm', 'iconphoto', self.root._w, icon_image)
-
+        try:
+            icon = ttk.PhotoImage(file=self.icon_path)
+            self.root.iconphoto(False, icon)
+        except Exception as e:
+            print(f"Icon error: {e}")
+        print(f"Icon full path: {os.path.abspath(self.icon_path)}")
+        print(f"Icon exists: {os.path.exists(self.icon_path)}")
 
         self.style = self.root.style
-        self.style.configure("TLabel", font=("Raleway", 9))
-        self.style.configure("TButton", font=("Raleway", 9))
-        self.style.configure("TEntry", font=("Raleway", 9))
-        self.style.configure("Link.TButton", font=("Raleway", 9))
+        self.style.configure("TLabel", font=("Raleway", 9),foreground="white")
+        self.style.configure("TButton", font=("Raleway", 9),foreground="white")
+        self.style.configure("TEntry", font=("Raleway", 9),foreground="white")
+        self.style.configure("Link.TButton", font=("Raleway", 9),foreground="white")
         self.style.map(
             "Link.TButton",
             foreground=[("active", "#87CEFA")],
@@ -54,16 +60,16 @@ class Authentication:
             signup_password_label = ttk.Label(framesignup, text="Password")
             signup_confirm_label = ttk.Label(framesignup, text="Confirm?")
 
-            signup_username_entry = ttk.Entry(framesignup, bootstyle="success")
+            signup_username_entry = ttk.Entry(framesignup, bootstyle="dark")
             signup_password_entry = ttk.Entry(
-                framesignup, bootstyle="success", show="*"
+                framesignup, bootstyle="dark", show="*"
             )
-            signup_confirm_entry = ttk.Entry(framesignup, bootstyle="success", show="*")
+            signup_confirm_entry = ttk.Entry(framesignup, bootstyle="dark", show="*")
 
             signup_button = ttk.Button(
                 framesignup,
                 text="Sign Up",
-                bootstyle="success",
+                bootstyle="dark",
                 command=lambda: self.authentication_validate_sign_up(
                     signup_username_entry, signup_password_entry, signup_confirm_entry
                 ),
@@ -89,7 +95,7 @@ class Authentication:
         self.loginwindow.title("Sign-in")
         self.loginwindow.resizable(False, False)
 
-        self.loginwindow.iconphoto(True,PhotoImage(file=self.icon_path)) 
+        self.loginwindow.iconphoto(True, PhotoImage(file=self.icon_path))
 
         framelogin = ttk.Frame(self.loginwindow)
         framelogin.grid(padx=10, pady=10)
@@ -97,11 +103,11 @@ class Authentication:
         username_label = ttk.Label(framelogin, text="Username")
         password_label = ttk.Label(framelogin, text="Password")
 
-        self.username_entry = ttk.Entry(framelogin, bootstyle="success")
-        self.password_entry = ttk.Entry(framelogin, bootstyle="success", show="*")
+        self.username_entry = ttk.Entry(framelogin, bootstyle="dark")
+        self.password_entry = ttk.Entry(framelogin, bootstyle="dark", show="*")
 
         submit_button = ttk.Button(
-            framelogin, bootstyle="success", text="Submit", command=self.submit_login
+            framelogin, bootstyle="dark", text="Submit", command=self.submit_login
         )
 
         signup_button = ttk.Button(
@@ -127,26 +133,44 @@ class Authentication:
         self, signup_username_entry, signup_password_entry, signup_confirm_entry
     ):
         if signup_password_entry.get() != signup_confirm_entry.get():
-            Messagebox.show_error("Passwords do not match.", "Error",parent=self.sign_up_window)
+            Messagebox.show_error(
+                "Passwords do not match.", "Error", parent=self.sign_up_window
+            )
         elif not re.match("^[a-zA-Z0-9._]*$", signup_username_entry.get()):
             Messagebox.show_error(
-                'Username can only contain letters, numbers, "." and "_".', "Error",parent=self.sign_up_window
+                'Username can only contain letters, numbers, "." and "_".',
+                "Error",
+                parent=self.sign_up_window,
             )
         elif not re.match("^[a-zA-Z0-9._]*$", signup_password_entry.get()):
             Messagebox.show_error(
-                'Password can only contain letters, numbers, "." and "_".', "Error",parent=self.sign_up_window
+                'Password can only contain letters, numbers, "." and "_".',
+                "Error",
+                parent=self.sign_up_window,
             )
         elif len(signup_username_entry.get()) < 8:
-            Messagebox.show_error("Username must be at least 8 characters.", "Error",parent=self.sign_up_window)
+            Messagebox.show_error(
+                "Username must be at least 8 characters.",
+                "Error",
+                parent=self.sign_up_window,
+            )
         elif len(signup_username_entry.get()) > 50:
             Messagebox.show_error(
-                "Username cannot be longer than 50 characters.", "Error",parent=self.sign_up_window
+                "Username cannot be longer than 50 characters.",
+                "Error",
+                parent=self.sign_up_window,
             )
         elif len(signup_password_entry.get()) < 8:
-            Messagebox.show_error("Password must be at least 8 characters.", "Error",parent=self.sign_up_window)
+            Messagebox.show_error(
+                "Password must be at least 8 characters.",
+                "Error",
+                parent=self.sign_up_window,
+            )
         elif len(signup_password_entry.get()) > 255:
             Messagebox.show_error(
-                "Password cannot be longer than 255 characters.", "Error",parent=self.sign_up_window
+                "Password cannot be longer than 255 characters.",
+                "Error",
+                parent=self.sign_up_window,
             )
         else:
             self.authentication_insert_user(
@@ -154,16 +178,21 @@ class Authentication:
             )
 
     def authentication_insert_user(self, signup_username_entry, signup_password_entry):
+        senha = signup_password_entry.get()
+        salt = bcrypt.gensalt()
+        senha_hash = bcrypt.hashpw(senha.encode('utf-8'),salt).decode('utf-8')
         try:
             cursor.execute(
-                "INSERT INTO Users VALUES (?,?)",
-                (signup_username_entry.get(), signup_password_entry.get()),
+                "INSERT INTO Users (Login, Password) VALUES (?,?)",
+                (signup_username_entry.get(), senha_hash),
             )
             print(f"User {signup_username_entry.get()} is logged")
             self.sign_up_window.destroy()
             self.sign_up_window = None
         except Exception as e:
-            Messagebox.show_error(f"Sign-up failed: {str(e)}", "Error",parent=self.sign_up_window)
+            Messagebox.show_error(
+                f"Sign-up failed: {str(e)}", "Error", parent=self.sign_up_window
+            )
 
     def submit_login(self):
         try:
@@ -171,28 +200,65 @@ class Authentication:
             password = self.password_entry.get()
 
             if self.authentication_login_validation(username, password):
-                from .requestdata import main_window
-
-                self.loginwindow.destroy()
-                main_window(self.root)
+                cursor.execute(
+                    "SELECT UserID FROM Users WHERE Login = ?",
+                    (username,)
+                )
+                result = cursor.fetchone()
+                
+                if result:
+                    self.user_id = result[0]  
+                    from .requestdata import main_window
+                    self.loginwindow.destroy()
+                    main_window(self.root, self.user_id, username, password)
             else:
-                Messagebox.show_error("Login or Password Incorrect.", "Error", parent=self.loginwindow)
+                Messagebox.show_error(
+                    "Login or Password Incorrect.", 
+                    "Error", 
+                    parent=self.loginwindow
+                )
 
         except Exception as e:
-            Messagebox.show_error(f"Login error: {str(e)}","Fatal Error", parent=self.loginwindow)
+            Messagebox.show_error(
+            f"Login error: {str(e)}", 
+            "Fatal Error", 
+            parent=self.loginwindow
+            )
 
     def authentication_login_validation(self, username, password):
         try:
             print("Conectando ao banco de dados...")
-            cursor.execute(
-                "SELECT * FROM Users WHERE Login = ? and Password = ?", (username, password)
-            )
-            result = cursor.fetchall()
-            print(f"Resultado da consulta: {result}")
+            cursor.execute("SELECT Password FROM Users WHERE Login = ?",(username,))
+            result = cursor.fetchone()
+
             if not result:
                 return False
-            else:
+
+            senha_hash = result[0].encode('utf-8')
+
+            if bcrypt.checkpw(password.encode('utf-8'), senha_hash):
                 return True
+            else:
+                return False
+
         except Exception as e:
             Messagebox.show_error(f"Database error: {str(e)}", "Error", parent=self.loginwindow)
             return False
+
+    def authentication_get_userID(self, username, password):
+        try:
+            cursor.execute(
+                "SELECT UserID FROM Users WHERE Login = ? and Password = ?",
+                (username.strip(), password.strip()),
+            )
+            result = cursor.fetchone()
+            if result:
+                self.user_id = result[0]
+                return True
+            return False
+        except Exception as e:
+            print(f"Erro ao buscar UserID: {e}")
+            return False
+
+    def get_userID(self):
+        return self.user_id
