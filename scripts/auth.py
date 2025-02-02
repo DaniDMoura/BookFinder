@@ -22,11 +22,10 @@ class Authentication:
             icon = ttk.PhotoImage(file=self.icon_path)
             self.root.iconphoto(False, icon)
         except Exception as e:
-            print(f"Icon error: {e}")
-        print(f"Icon full path: {os.path.abspath(self.icon_path)}")
-        print(f"Icon exists: {os.path.exists(self.icon_path)}")
+            Messagebox.show_error(f"Icon error: {e}","Error",parent=self.loginwindow)
 
         self.style = self.root.style
+        self.style.configure("little.TLabel",font=("Raleway",4))
         self.style.configure("TLabel", font=("Raleway", 9),foreground="white")
         self.style.configure("TButton", font=("Raleway", 9),foreground="white")
         self.style.configure("TEntry", font=("Raleway", 9),foreground="white")
@@ -186,7 +185,6 @@ class Authentication:
                 "INSERT INTO Users (Login, Password) VALUES (?,?)",
                 (signup_username_entry.get(), senha_hash),
             )
-            print(f"User {signup_username_entry.get()} is logged")
             self.sign_up_window.destroy()
             self.sign_up_window = None
         except Exception as e:
@@ -227,7 +225,7 @@ class Authentication:
 
     def authentication_login_validation(self, username, password):
         try:
-            print("Conectando ao banco de dados...")
+
             cursor.execute("SELECT Password FROM Users WHERE Login = ?",(username,))
             result = cursor.fetchone()
 

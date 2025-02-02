@@ -76,44 +76,42 @@ def create(
 
 def read(user_id):
     books = []
-    connection = connect_to_db()
-    cursor = connection.cursor()
-    if connection:
-        try:
-            cursor.execute("USE SelectedBooks;")
-            cursor.execute(
-                """
-            SELECT * FROM WishListBooks 
-            WHERE UserID = ?
-        """,(user_id,)
-            )
-            books = cursor.fetchall()
-        except Exception as e:
-            print(f"Error to read wish list: {e}")
-        finally:
-            cursor.close()
-            connection.close()
-    return books
+    with get_db_connection() as connection:
+        cursor = connection.cursor()
+        if connection:
+            try:
+                cursor.execute("USE SelectedBooks;")
+                cursor.execute(
+                    """
+                SELECT * FROM WishListBooks 
+                WHERE UserID = ?
+            """,(user_id,)
+                )
+                books = cursor.fetchall()
+            except Exception as e:
+                print(f"Error to read wish list: {e}")
+            finally:
+                cursor.close()
+        return books
 
 
 def delete(book_id,user_id):
-    connection = connect_to_db()
-    cursor = connection.cursor()
-    if connection:
-        try:
-            cursor.execute("USE SelectedBooks;")
-            cursor.execute(
-                """
-        DELETE FROM WishListBooks WHERE BookID = ? AND UserID = ?
-    """,
-                (book_id,user_id),
-            )
-            return True
-        except Exception as e:
-            print(f"Error to delete book: {e}")
-            return False
+    with get_db_connection() as connection:
+        if connection:
+            try:
+                cursor = connection.cursor()
+                cursor.execute("USE SelectedBooks;")
+                cursor.execute(
+                    """
+            DELETE FROM WishListBooks WHERE BookID = ? AND UserID = ?
+        """,
+                    (book_id,user_id),
+                )
+                return True
+            except Exception as e:
+                print(f"Error to delete book: {e}")
+                return False
 
-        finally:
-            cursor.close()
-            connection.close()
-    return False
+            finally:
+                cursor.close()
+        return False

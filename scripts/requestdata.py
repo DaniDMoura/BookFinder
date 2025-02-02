@@ -1,18 +1,19 @@
 import requests
-import ttkbootstrap as ttk
+import ttkbootstrap as tb
 import webbrowser
 from ttkbootstrap.dialogs import Messagebox
-from .Entries.configapi import GOOGLE_API_KEY
+from .config import api_key
 from .crud import create, read, delete
 from tkinter import *
 from PIL import Image, ImageTk
 from io import BytesIO
 
+
 window = None
 
 def request_data(query,user_id):
     response = requests.get(
-        f"https://www.googleapis.com/books/v1/volumes?q={query}&key={GOOGLE_API_KEY}"
+        f"https://www.googleapis.com/books/v1/volumes?q={query}&key={api_key}"
     )
     match response.status_code:
         case 200:
@@ -144,7 +145,7 @@ def create_book_window(
     BuyLink,
     user_id 
 ):
-    bookwindow = ttk.Toplevel(window)
+    bookwindow = tb.Toplevel(window)
     bookwindow.title(f"{Title}")
     bookwindow.geometry("637x372")
     bookwindow.resizable(False, False)
@@ -154,13 +155,13 @@ def create_book_window(
     canvas = Canvas(bookwindow, bg="black")
     canvas.pack(side=LEFT, fill=BOTH, expand=True)
 
-    scrollbar = ttk.Scrollbar(
+    scrollbar = tb.Scrollbar(
         bookwindow, orient=VERTICAL, command=canvas.yview, style="TScrollbar"
     )
     scrollbar.pack(side=RIGHT, fill=Y)
     canvas.config(yscrollcommand=scrollbar.set)
 
-    framebook = Frame(canvas)
+    framebook = tb.Frame(canvas)
     canvas.create_window((0, 0), window=framebook, anchor="nw")
 
     try:
@@ -175,18 +176,18 @@ def create_book_window(
     except Exception as e:
         print(f"Error loading image: {e}")
 
-    titlelabel = ttk.Label(framebook, text=f"{Title}", style="Allbold.TLabel")
-    authorlabel = ttk.Label(framebook, text=f"Author: {Author}", style="All.TLabel")
-    publisherlabel = ttk.Label(framebook, text=f"Publisher: {Publisher}", style="All.TLabel")
-    publisherdatelabel = ttk.Label(framebook, text=f"Publised Date: {PublishedDate}", style="All.TLabel")
-    descriptionlabel = ttk.Label(framebook, text=f"{Description}", style="All.TLabel")
-    pagecountlabel = ttk.Label(framebook, text=f"Page Count: {PageCount}", style="All.TLabel")
-    languagelabel = ttk.Label(framebook, text=f"Language: {Language}", style="All.TLabel")
+    titlelabel = tb.Label(framebook, text=f"{Title}", style="Allbold.TLabel")
+    authorlabel = tb.Label(framebook, text=f"Author: {Author}", style="All.TLabel")
+    publisherlabel = tb.Label(framebook, text=f"Publisher: {Publisher}", style="All.TLabel")
+    publisherdatelabel = tb.Label(framebook, text=f"Publised Date: {PublishedDate}", style="All.TLabel")
+    descriptionlabel = tb.Label(framebook, text=f"{Description}", style="All.TLabel")
+    pagecountlabel = tb.Label(framebook, text=f"Page Count: {PageCount}", style="All.TLabel")
+    languagelabel = tb.Label(framebook, text=f"Language: {Language}", style="All.TLabel")
 
     if tk_image:
-        imagelinklabel = ttk.Label(framebook, image=tk_image)
+        imagelinklabel = tb.Label(framebook, image=tk_image)
     else:
-        imagelinklabel = ttk.Label(framebook, text="Image not available")
+        imagelinklabel = tb.Label(framebook, text="Image not available")
 
     def safe_buy_link():
         if BuyLink != "Unknown":
@@ -218,13 +219,13 @@ def create_book_window(
                                   parent=bookwindow)
      
 
-    buybutton = ttk.Button(
+    buybutton = tb.Button(
         framebook,
         text="Buy",
         bootstyle="dark",
         command=safe_buy_link,
     )
-    wishlistbutton = ttk.Button(
+    wishlistbutton = tb.Button(
         framebook,
         text="Put this book on my wish list",
         bootstyle="secondary",
@@ -266,21 +267,21 @@ def read_wishlist(root, user_id):
     selected_book_id = StringVar(value="")
     clicks = 0
 
-    wishlist_window = ttk.Toplevel(root)
+    wishlist_window = tb.Toplevel(root)
     wishlist_window.title("Your Wishlist")
     wishlist_window.geometry("700x400")
     wishlist_window.resizable(False, False)
 
-    top_frame = ttk.Frame(wishlist_window)
+    top_frame = tb.Frame(wishlist_window)
     top_frame.pack(fill=BOTH, padx=10, pady=10)
 
-    container = ttk.Frame(wishlist_window)
+    container = tb.Frame(wishlist_window)
     container.pack(fill=BOTH, expand=True)
 
     canvas = Canvas(container, bg="black")
     canvas.pack(side=TOP, fill=BOTH, expand=True)
 
-    scrollbar_read = ttk.Scrollbar(container, orient=HORIZONTAL, command=canvas.xview)
+    scrollbar_read = tb.Scrollbar(container, orient=HORIZONTAL, command=canvas.xview)
     scrollbar_read.pack(side=BOTTOM, fill=X)
     canvas.config(xscrollcommand=scrollbar_read.set)
 
@@ -292,7 +293,7 @@ def read_wishlist(root, user_id):
     imageX = imageX.resize((20, 20))
     image_tkX = ImageTk.PhotoImage(imageX)
 
-    frame = ttk.Frame(canvas, padding=10)
+    frame = tb.Frame(canvas, padding=10)
     canvas.create_window((0, 0), window=frame, anchor="nw")
 
     images = []
@@ -312,19 +313,19 @@ def read_wishlist(root, user_id):
 
     def handle_delete(book_id):
         try:
-            delete(user_id, book_id)
-            for widget in frame.winfo_children():
-                widget.destroy()
-            read_wishlist(root, user_id)
+            delete(book_id,user_id)
+            wishlist_window.destroy()
+            read_wishlist(root,user_id)
         except Exception as e:
             print(f"Error deleting book: {e}")
 
-    button_delete = ttk.Button(top_frame, image=image_tk, bootstyle="dark",
+
+    button_delete = tb.Button(top_frame, image=image_tk, bootstyle="dark",
                                command=status_confirm)  
     button_delete.image = image_tk
     button_delete.pack(side=LEFT, padx=3)
 
-    delete_label = ttk.Label(top_frame, text="", font=("Raleway", 10), anchor="w")
+    delete_label = tb.Label(top_frame, text="", font=("Raleway", 10), anchor="w")
     delete_label.pack(side=LEFT, padx=5)
 
     for book in books:
@@ -333,11 +334,11 @@ def read_wishlist(root, user_id):
             title, img_url, book_id = book[1], book[7], book[0]
 
             #Book Frame
-            book_frame = ttk.Frame(frame)
+            book_frame = tb.Frame(frame)
             book_frame.grid(row=0, column=column_grid, padx=10, pady=10,sticky=S)
 
             #Confirm Button
-            confirm_button = ttk.Button(
+            confirm_button = tb.Button(
                 book_frame,
                 image=image_tkX,
                 bootstyle="dark",
@@ -354,13 +355,13 @@ def read_wishlist(root, user_id):
             images.append(img)
 
             #Button for image
-            button_image = ttk.Button(book_frame, image=img,
+            button_image = tb.Button(book_frame, image=img,
                                 command=lambda t=title,uid=user_id: request_data(t,uid),
                                 bootstyle="link")
             button_image.image = img
 
             #Label for title
-            label_title = ttk.Label(book_frame, text=title, font=("Raleway", 9), wraplength=120, justify="center")
+            label_title = tb.Label(book_frame, text=title, font=("Raleway", 9), wraplength=120, justify="center")
             button_image.grid(row=0, column=0)
             label_title.grid(row=1, column=0)
 
@@ -382,38 +383,41 @@ def read_wishlist(root, user_id):
 def main_window(root, user_id, username, password):
     global window, entry_query, image_tksearch
     print(f"UserID: {user_id}, Username: {username}, Password: {password}")
-    window = ttk.Toplevel(root)
+
+    window = tb.Toplevel(root)
     window.title("Pesquisar")
-    window.geometry("350x315")
+    window.geometry("350x325")
     window.resizable(False,False)
 
-    frame = ttk.Frame(window)
+    frame = tb.Frame(window)
     frame.pack(pady=20, padx=20, fill="both", expand=True,side=LEFT)
 
     try:
-        imagesearch = Image.open("assets/Icons/research.png")
+        imagesearch = Image.open("assets/Images/research.png")
         imagesearch_resized = imagesearch.resize((100, 100))
         image_tksearch = ImageTk.PhotoImage(imagesearch_resized)
+
     except Exception as e:
         print(f"Erro ao carregar a imagem: {e}")
 
 
-    labelimg = ttk.Label(frame,image=image_tksearch)
-    label = ttk.Label(frame, text="Enter the book name:")
-    entry_query = ttk.Entry(frame, width=30, bootstyle="dark")
-    button_search = ttk.Button(frame, text="Search", 
+    labelimg = tb.Label(frame,image=image_tksearch)
+    label = tb.Label(frame, text="Enter the book name:",foreground="white")
+    entry_query = tb.Entry(frame, width=30, bootstyle="dark")
+    button_search = tb.Button(frame, text="Search", 
                                command=lambda: search(entry_query,user_id), bootstyle="dark")
-    button_wishlist = ttk.Button(frame, text="See your wish list", 
+    button_wishlist = tb.Button(frame, text="See your wish list", 
                                  command=lambda: read_wishlist(window, user_id), bootstyle="secondary"
     )
+    label_license = tb.Label(frame,text="© 2025 J.D.S. Moura – MIT.",foreground="white",font=("Raleway",7))
 
     label.pack(pady=5)
     labelimg.pack(pady=5)
     entry_query.pack(pady=5)
     button_search.pack(pady=5,fill=X)
     button_wishlist.pack(pady=5,fill=X)
+    label_license.pack(side=BOTTOM)
 
-
-    window.protocol("WM_DELETE_WINDOW", window.quit)
+    window.protocol("WM_DELETE_WINDOW", root.quit)
 
 

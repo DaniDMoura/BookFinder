@@ -1,12 +1,12 @@
 import pyodbc
-from .Entries.entries_db import SERVER
+from .config import server_url
 
 
 def connect_to_db():
     try:
         connection = pyodbc.connect(
             r"DRIVER={ODBC Driver 18 for SQL Server};"
-            f"SERVER={SERVER};"
+            f"SERVER={server_url};"
             f"Trusted_Connection=yes;"
             "TrustServerCertificate=yes;"
         )

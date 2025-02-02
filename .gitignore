@@ -12,6 +12,4 @@ venv/
 .env/
 env/
 *.bak
-Entries/
-entries_db.txt
-configapi.py
+.env
