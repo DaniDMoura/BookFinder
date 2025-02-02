@@ -3,7 +3,7 @@
 
 BookFinder is a desktop application built with Python and ttkbootstrap that allows users to search for books using the Google Books API. Users can create accounts, search for books, view detailed information about them, and maintain a wishlist of their favorite books.
 
-![Login Screen](assets/Images/research.png)
+![Login Screen](assets/Images/research.PNG)
 
 
 ## Features
